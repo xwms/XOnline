@@ -95,7 +95,7 @@ function check () {
   }
   fs.access(json_path.exeFiles[0], (err) => {
     if (err) {
-      downloadFile('http://175.178.57.88/frpc/frpc.exe',json_path.exeFiles[0])
+      downloadFile('cnm',json_path.exeFiles[0])
     }
   })
   fs.access(json_path.files[3], (err) => {
@@ -150,7 +150,7 @@ app.whenReady().then(() => {
   createWindow()
   tray()
   setTimeout(() => {
-    updater('http://175.178.57.88/version/releases/')
+    updater('cnm')
   },3000)
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
