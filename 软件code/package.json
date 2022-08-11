@@ -82,7 +82,7 @@
     "publish": [
       {
         "provider": "generic",
-        "url": "http://175.178.57.88/version/releases/"
+        "url": "nnd"
       }
     ]
   },
