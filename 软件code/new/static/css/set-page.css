@@ -1,0 +1,26 @@
+.column {
+    margin-left: 24%;
+    width: 50%;
+    min-width: 300px;
+    padding: 20px;
+    background: rgba(0, 0, 0, .8);
+    border-radius: 10px;
+    animation: fadein ease 0.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+.column input{
+    width: 20px;
+    height: 20px;
+    outline: none;
+    background: rgba(0, 0, 0, .8);
+    border-color: cornflowerblue;
+    border-radius: 5px;
+    color: #fff;
+}
+.column button {
+    border-color: cornflowerblue;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .8);
+    color: #fff;
+}

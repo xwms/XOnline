@@ -1,0 +1,30 @@
+.con {
+    padding: 10px;
+    width: 100%;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, .8);
+    animation: fadein ease 0.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+.con a {
+    color: #fff;
+    font-size: 25px;
+    padding: 12px;
+}
+.con p {
+    padding: 12px;
+    color: cornflowerblue;
+}
+.con textarea {
+    outline: none;
+    resize: none;
+    border-radius: 10px;
+    width: 100%;
+    overflow: auto;
+    word-break: break-all;
+    background: rgba(0, 0, 0, .8);
+    padding: 12px;
+    font-size: 15px;
+    color: chartreuse;
+}

@@ -1,0 +1,63 @@
+.total-box {
+    margin-left: 30%;
+    margin-right: 30%;
+    height: auto;
+    padding: 40px;
+    background: rgba(0, 0, 0, .8);
+    border-radius: 10px;
+    animation: fadein ease 0.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+.total-box .user-box {
+    position: relative;
+}
+.total-box .user-box input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #fff;
+    margin-bottom: 30px;
+    border: none;
+    border-bottom: 1px solid #fff;
+    outline: none;
+    background: transparent;
+}
+.total-box .user-box label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #fff;
+    pointer-events: none;
+    transition: .5s;
+}
+.total-box .user-box input:focus~label,
+.total-box .user-box input:valid~label {
+    top: -20px;
+    left: 0;
+    color: cornflowerblue;
+    font-size: 12px;
+}
+.total-box button {
+    position: relative;
+    display: inline-block;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    text-decoration: none;
+    text-transform: uppercase;
+    overflow: hidden;
+    transition: .5s;
+    margin-top: 40px;
+    letter-spacing: 4px
+}
+.total-box button:hover {
+    background: cornflowerblue;
+    color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 20px cornflowerblue;
+}

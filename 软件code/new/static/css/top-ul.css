@@ -1,0 +1,28 @@
+.top-ul {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    -webkit-app-region: drag;
+}
+.top-ul a {
+    float: left;
+    font-size: 20px;
+    padding: 10px 12px;
+}
+.top-ul li {
+    float: right;
+}
+.top-ul li button {
+    background: none;
+    border: none;
+    display: block;
+    color: #cbccd4;
+    text-shadow: -1px 1px 0 #666, 1px 1px 0 #666, 1px -1px 0 #666, -1px -1px 0 #666;
+    padding: 10px 12px;
+    font-size: 21px;
+    -webkit-app-region: no-drag;
+}

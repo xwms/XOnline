@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XOnline</title>
+    <link rel="stylesheet" href="./static/style.css">
+    <link rel="stylesheet" href="./static/css/top-ul.css">
+    <link rel="stylesheet" href="./static/css/list-page.css">
+    <link rel="stylesheet" href="./static/css/create-page.css">
+    <link rel="stylesheet" href="./static/css/con-page.css">
+    <link rel="stylesheet" href="./static/css/set-page.css">
+    <link rel="stylesheet" href="./static/css/about-page.css">
+    <link rel="stylesheet" href="./static/iconfont.css">
+    <link rel="stylesheet" href="https://unpkg.com/vue3-layer/dist/s3Layer.css" />
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/vue-router@4"></script>
+    <script src="https://unpkg.com/element-plus"></script>
+    <script src="https://unpkg.com/vue3-layer@1.0.14/dist/s3Layer.umd.min.js"></script>
+    <script src="./static/js/axios.min.js"></script>
+    <script>
+        var num = 0
+        axios.get("http://127.0.0.1:5656/cfg/import/appset.json")
+        .then((res) => {
+            document.getElementById("body").style.backgroundImage="url(http://127.0.0.1:5656/cfg/background/"+res.data.background.picture[0]+")"
+            setInterval("change()",res.data.background.interval*1000)
+        })
+        function change() {
+            axios.get("http://127.0.0.1:5656/cfg/import/appset.json")
+            .then((res) => {
+                if(res.data.background.autoChange){
+                    num++
+                    if(num >= res.data.background.picture.length){
+                        num = 0
+                    }
+                    document.getElementById("body").style.backgroundImage="url(http://127.0.0.1:5656/cfg/background/"+res.data.background.picture[num]+")"
+                }else{
+                    document.getElementById("body").style.backgroundImage="url(http://127.0.0.1:5656/cfg/background/"+res.data.background.picture[0]+")"
+                }
+            })
+        }
+    </script>
+</head>
+<body id="body">
+    <div id="app">
+        <div class="router">
+            <router-view></router-view>
+        </div>
+        <ul class="top-ul" ref="themeColor">
+            <a ref="titleTextColor">XOnline&nbsp;&nbsp;&nbsp;&nbsp;{{ title }}</a>
+            <li><button @click="quit">X</button></li>
+            <li><button @click="min">-</button></li>
+        </ul>
+        <el-button type="primary" size="large" style="position: fixed;left: 16px;bottom: 16px;" @click="drawer = true" circle><i class="iconfont icon-caidan"></i></el-button>
+        <el-drawer v-model="drawer" title="I am the title" :with-header="false" size="12%" direction="btt">
+            <el-row>
+                <el-button type="primary" text bg @click="to('/list')"><i class="iconfont icon-liebiao"></i>&nbsp;列表</el-button>
+                <el-button type="primary" text bg @click="to('/create')"><i class="iconfont icon-jia"></i>&nbsp;创建</el-button>
+                <el-button type="primary" text bg @click="to('/control')"><i class="iconfont icon-hezichengxu"></i>&nbsp;终端</el-button>
+                <el-button type="primary" text bg @click="to('/about')"><i class="iconfont icon-guanyu"></i>&nbsp;关于</el-button>
+                <el-button type="primary" text bg @click="to('/set')"><i class="iconfont icon-shezhi"></i>&nbsp;设置</el-button>
+              </el-row>
+        </el-drawer>
+        <el-dialog v-model="visible" title="更新" draggable>
+            <span>{{ context }}</span>
+            <el-progress :percentage="downloadProgressPercent" />
+          </el-dialog>
+        <el-dialog v-model="visible1" title="已更新至最新版本~" draggable>
+            <span>{{ updateTitle }}</span>
+            <br>
+            <span>{{ updateContext }}</span>
+            <template #footer>
+            <span style="margin-right: 10px;">
+                <el-button type="primary" @click="confirmed">我明白了</el-button>
+            </span>
+            </template>
+          </el-dialog>
+    </div>
+    <script>
+        var ipcRender = require('electron').ipcRenderer
+        const List = {
+            template: '<div class="search-box"> \
+            <input class="search-txt" type="text" v-model="Icontent" placeholder="输入点什么呢~" @keyup.enter="txtSearch"/> \
+            <a class="search-btn" type="button" @click="txtSearch"><i class="iconfont icon-sousuo"></i></a> \
+            </div> \
+            <br><br> \
+            <ul class="list-ul"> \
+            <li v-for="item in items" @click="on(item.code)"> \
+            <div> \
+            <a v-text = item.name></a> \
+            <p v-text = item.des></p> \
+            </div> \
+            <br> \
+            </li> \
+            </ul> \
+            <s3-layer v-model="visible" title="提示" @yes="open">是否加入此连接?</s3-layer> ',
+            created() {
+                axios.get("http://127.0.0.1:5656/cfg/import/connectconfig.ini")
+                .then((res) => {
+                    this.cfg = res.data
+                })
+                axios.get("http://175.178.57.88:8080/App/XOnline/ConnectCode/list")
+                .then((res) => {
+                    this.items = res.data
+                })
+            },
+            data() {
+                return {
+                    visible: false,
+                    items: [],
+                    Icontent: '',
+                    code: '',
+                    cfg: '',           
+                }
+            },
+            methods: {
+                get() {
+                    axios.get("http://127.0.0.1:5656/cfg/import/connectconfig.ini")
+                    .then((res) => {
+                        this.cfg = res.data
+                    })
+                },
+                on(code) {
+                    this.code = code
+                    this.visible = true
+                },
+                open() {
+                    if(!this.cfg){
+                        this.visible = false
+                        ipcRender.send('start-frp',{type:"j",data:{code:this.code,port:'26150'}})
+                        layer.msg("连接成功 ! ", { icon: 1 })
+                        this.get()
+                        setTimeout(() => {            
+                            this.$router.push('/control')        
+                        },2000)
+                    }else{
+                        this.visible = false
+                        layer.msg("请关闭当前连接再加入 ! ", { icon: 5 })
+                    }
+                },
+                txtSearch() {
+                    if(this.Icontent){
+                        if(RegExp(/&/).test(this.Icontent) && this.Icontent.length == 33) {
+                            this.code = this.Icontent
+                            this.visible = true
+                        }else{
+                            let list = this.items.filter(item=>item.name.toString().indexOf(this.Icontent)>=0)
+                            this.items = list
+                        }
+                    }
+                }
+            },
+            watch: {
+                Icontent(value) {
+                    if(!value) {
+                        axios.get("http://175.178.57.88:8080/App/XOnline/ConnectCode/list")
+                        .then((res) => {
+                            this.items = res.data
+                        })
+                    }
+                }
+            }
+        }
+        const Create = {
+            template: '<div class="total-box"> \
+            <p style="display:inline;">公开连接</p> \
+            <el-switch v-model="isPublic" @click="sw" /> \
+            <br><br> \
+            <div class="user-box"> \
+            <input type="text" required="" v-model="name" maxlength="10" v-show="dom_name"> \
+            <label v-show="dom_name_l">名称</label> \
+            <div class="user-box"> \
+            <input type="text" required="" v-model="port" maxlength="5" @keyup.enter="create"> \
+            <label>端口</label> \
+            </div> \
+            <div class="user-box"> \
+            <input type="text" required="" v-model="des" maxlength="50" v-show="dom_des" @keyup.enter="create"> \
+            <label v-show="dom_des_l">描述</label> \
+            </div> \
+            <button @click="create">创建</button> \
+            </div>',
+            created() {
+                axios.get("http://127.0.0.1:5656/cfg/import/connectconfig.ini")
+                .then((res) => {
+                    this.cfg = res.data
+                })
+            },
+            data() {
+                return {
+                    name: '',
+                    port: '',
+                    des: '',
+                    cfg: '',
+                    isPublic: false,
+                    dom_name: false,
+                    dom_des: false,
+                    dom_name_l: false,
+                    dom_des_l: false,
+                    public: false
+                }
+            },
+            methods: {
+                get() {
+                    axios.get("http://127.0.0.1:5656/cfg/import/connectconfig.ini")
+                    .then((res) => {
+                        this.cfg = res.data
+                })
+                },
+                create() {
+                    if(this.public){
+                        if (!this.name.replace(/\s+/g,'') || !this.port.replace(/\s+/g,'') || !this.des.replace(/\s+/g,'')) {
+                           layer.msg("不能留空 ! ", { icon: 5 })
+                        } else {
+                            if(!this.cfg){
+                                axios({
+                                    method: 'post',
+                                    url: "http://175.178.57.88:8080/App/XOnline/ConnectCode/add",
+                                    params: {name:this.name,des:this.des,code:random_string(16)+'&'+random_string(16),port:this.port.replace(/\s+/g,'')}
+                                }).then(res => {
+                                    if(res.data.success){
+                                        ipcRender.send('start-frp',{type:"c",data:JSON.parse(res.data.data)})
+                                        layer.msg("创建成功 ! ", { icon: 1 })
+                                        this.get()
+                                        setTimeout(() => {
+                                            this.$router.push('/control')
+                                        },1000)
+                                    }else{
+                                        layer.msg("错误 ! "+res.data.error, { icon: 5 })
+                                    }
+                                }).catch(err => {
+                                    layer.msg("服务器发生错误 ! "+err, { icon: 5 })
+                                })
+                            }else{
+                                layer.msg("请关闭当前连接再创建 ! ", { icon: 5 })
+                            }
+                        }
+                    }else{
+                        if (!this.port) {
+                            layer.msg("不能留空 ! ", { icon: 5 })
+                        }else{
+                            if(!this.cfg){
+                                ipcRender.send('start-frp',{type:"c",data:{code:random_string(16)+'&'+random_string(16),port:this.port}})
+                                layer.msg("创建成功 ! ", { icon: 1 })                                  
+                                this.get()
+                                setTimeout(() => {    
+                                    this.$router.push('/control')
+                                },1000)
+                            }else{
+                                layer.msg("请关闭当前连接再加入 ! ", { icon: 5 })
+                            }
+                        }
+                    }
+                },
+                sw() {
+                    if(this.isPublic){
+                        this.dom_name = true
+                        this.dom_name_l = true
+                        this.dom_des = true
+                        this.dom_des_l = true
+                        this.public = true
+                    }else{
+                        this.dom_name = false
+                        this.dom_name_l = false
+                        this.dom_des = false
+                        this.dom_des_l = false
+                        this.public = false
+                    }
+                }
+            }
+        }
+        const appSet = {
+            template: '<div class="column"> \
+            <p>个性化</p> \
+            <ul> \
+            <li> \
+            <p>主题</p> \
+            <el-radio-group v-model="themeColor"> \
+            <el-radio label="#cbccd4" size="large">默认</el-radio> \
+            <el-radio label="#409EFF" size="large">科技蓝</el-radio> \
+            <el-radio label="#67C23A" size="large">瓜皮绿</el-radio> \
+            <el-radio label="#E6A23C" size="large">警告黄</el-radio> \
+            <el-radio label="#F56C6C" size="large">危险红</el-radio> \
+            <el-radio label="none" size="large">透明</el-radio> \
+            </el-radio-group> \
+            </li> \
+            <li> \
+            <p>标题栏</p> \
+            <p>设置标题文本</p> \
+            <input style="width:90%;height:28px" type="text" required="" v-model="titleText"> \
+            <br><br> \
+            <p>选择文本颜色</p> \
+            <el-radio-group v-model="titleTextColor"> \
+            <el-radio label="#666" size="large">默认</el-radio> \
+            <el-radio label="#fff" size="large">明亮白</el-radio> \
+            </el-radio-group> \
+            </li> \
+            <li> \
+            <p>背景</p> \
+            <p style="display:inline">添加背景图片</p> \
+            <button style="width:100px;height:30px;" @click="open">打开文件夹</button> \
+            <br> \
+            <p style="display:inline">开启自动变换</p> \
+            <el-switch v-model="isDone" /> \
+            <br> \
+            <p style="display:inline">设置变换间隔</p> \
+            <input style="width:50px;height:25px" type="text" required="" v-model="interval"> 秒 \
+            <br><br> \
+            <button style="width:120px;height:40px;" @click="update">刷新</button> \
+            </li> \
+            </ul> \
+            <br> \
+            <p>通用</p> \
+            <ul> \
+            <li> \
+            <p>设置开机启动</p> \
+            <el-switch v-model="isStartUp" @click="startUp" active-text="开" inactive-text="关" /> \
+            </li> \
+            <br> \
+            <li> \
+            <p>清除本地缓存</p> \
+            <button style="width:120px;height:40px;" @click="clear">清除缓存</button> \
+            </li> \
+            </ul> \
+            </div>',
+            created() {
+                axios.get("http://127.0.0.1:5656/cfg/import/appset.json")
+                .then((res) => {
+                    this.isDone = res.data.background.autoChange
+                    this.interval = res.data.background.interval
+                    this.isStartUp = res.data.startUp
+                    this.themeColor = res.data.themeColor
+                    this.titleText = res.data.title.titleText
+                    this.titleTextColor = res.data.title.titleTextColor
+                })
+                },
+            data() {
+                return {
+                    isStartUp: '',
+                    interval: '',
+                    isDone: '',
+                    themeColor: '',
+                    titleText: '',
+                    titleTextColor:'',
+                    closeSet: ''
+                }
+            },
+            methods: {
+                open() {
+                    ipcRender.send('open-folder')
+                },
+                update() {
+                    var res = {
+                        themeColor:this.themeColor,
+                        title:{
+                            titleText:this.titleText,
+                            titleTextColor:this.titleTextColor
+                        },
+                        autoChange:this.isDone,
+                        interval:this.interval
+                    }
+                    ipcRender.send('refresh',res)
+                    location.reload()
+                },
+                startUp() {
+                    this.isStartUp ? ipcRender.send('start-up',true) : ipcRender.send('start-up',false)
+                },
+                clear() {
+                    ipcRender.send('clear-local-data')
+                    layer.msg("已清除 ! ", { icon: 1 })
+                }
+            }
+        }
+        const Control = {
+            template: '<div class="con"> \
+                <a>连接码 : {{ code }}</a><a @click="copy_code"><i class="iconfont icon-copy"></i></a> \
+                <a style="float: right;" class="iconfont icon-guanbi" @click="close"></a> \
+                </div> \
+                <br> \
+                <div class="con"> \
+                <p>端口 : {{ port }}</p> \
+                <a>日志 :</a> \
+                <textarea rows="12" disabled="disabled" v-text = "log"></textarea> \
+                </div>',
+                data() {
+                    return {
+                        code: '',
+                        port: '',
+                        log: '',
+                        json: ''
+                    }
+                },
+                created() {
+                axios.get("http://127.0.0.1:5656/cache/user/history.json")
+                .then((res) => {
+                    this.json = res.data
+                    this.code = res.data.code
+                    this.port = res.data.port
+                })
+                axios.get("http://127.0.0.1:5656/cache/log/connect.log")
+                .then((res) => {
+                    this.log = res.data
+                })
+                },
+                methods: {
+                    close() {
+                        ipcRender.send('close-frp')
+                        this.code = ''
+                        this.port = ''
+                        this.log = ''
+                        if(this.json.name || this.json.des) {
+                            axios({
+                                    method: 'post',
+                                    url: "http://175.178.57.88:8080/App/XOnline/ConnectCode/remove",
+                                    params: this.json
+                                }).then((res) => {
+                                    console.log(res.data)
+                                }).catch(err => {
+                                    layer.msg("服务器发生错误 ! "+err, { icon: 5 })
+                                })
+                        }
+                        layer.msg("已关闭 ! ", { icon: 1 })
+                    },
+                    copy_code() {
+                        copy(this.code)
+                    }
+                }
+        }
+        const About = {
+            template: '<div class="about"> \
+                <p style="color:chartreuse">版本号&nbsp;&nbsp;V1.3.1</p> \
+                <p>本软件仅由一人制作&nbsp;&nbsp;&nbsp;&nbsp;©2021-2022&nbsp;&nbsp;X_watermelons</p> \
+                <p style="color:cornflowerblue">本软件不会收集您任何个人信息</p> \
+                <p>QQ交流/反馈群:&nbsp;465335437</p> \
+                <button style="width:120px;height:40px;" @click="openBrowser">赞助开发者</button> \
+                </div>',
+                methods: {
+                    openBrowser() {
+                        ipcRender.send('open-browser','https://afdian.net/@Xwatermelons')
+                    }
+                }
+        }
+        const routes = [
+            { path: '/list', component: List },
+            { path: '/create', component: Create },
+            { path: '/set', component: appSet },
+            { path: '/control', component: Control },
+            { path: '/about', component: About }
+        ]
+        const router = VueRouter.createRouter({
+            history: VueRouter.createWebHashHistory(),
+            routes,
+        })
+        const app = Vue.createApp({
+            mounted() {
+                axios.get("http://127.0.0.1:5656/cfg/import/appset.json")
+                .then((res) => {
+                    this.$refs.themeColor.style.backgroundColor = res.data.themeColor
+                    this.title = res.data.title.titleText
+                    this.$refs.titleTextColor.style.color = res.data.title.titleTextColor
+                })
+                axios.get("http://175.178.57.88:8080/App/XOnline/Version/latest")
+                .then((res) => {
+                    this.updateTitle = res.data.version + '更新内容:'
+                    this.updateContext = res.data.content
+                })
+                setTimeout(() => {
+                    ipcRender.send('check-for-update')
+                },2000)
+                ipcRender.on('message', (event, data) => {
+                    data ? this.visible = true : this.updatedInfo()
+                    this.context = "找到新版本啦! 正在下载更新包..."
+                })
+                ipcRender.on('downloadProgress', (event, progressobj) => {
+                    this.downloadProgressPercent = parseInt(progressobj.percent)
+                })
+                ipcRender.on('is-update-now', () => {
+                    this.context = "更新包下载完成"
+                    setTimeout(() => {
+                        ipcRender.send('update-now')
+                    },1500)
+                })
+            },
+            data() {
+                return {
+                    title:'',
+                    drawer: false,
+                    visible: false,
+                    visible1: false,
+                    context: '',
+                    updateTitle: '',
+                    updateContext: '',
+                    downloadProgressPercent: 0
+                }
+            },
+            methods: {
+                to(page) {
+                    this.drawer = false
+                    this.$router.push(page)
+                },
+                quit() {
+                    ipcRender.send('quit')
+                },
+                min() {
+                    ipcRender.send('min')
+                },
+                updatedInfo() {
+                    axios.get("http://127.0.0.1:5656/local/confirm.txt")
+                    .then((res) => {
+                        if(!res.data){
+                            this.visible1 = true
+                        }
+                    }).catch(() => {
+                        this.visible1 = true
+                    })
+                },
+                confirmed() {
+                    ipcRender.send('confirmed')
+                    this.visible1 = false
+                }
+            }
+        })
+        app.use(router)
+        app.use(ElementPlus)
+        app.component('s3-layer', s3Layer.s3Layer)
+        app.mount('#app')
+        function random_string(n){
+            var str = "abcdefghijklmnopqrstuvwxyz0123456789"
+            var result = ""
+            for(var i = 0; i < n; i++) {
+                result += str[parseInt(Math.random() * str.length)]
+            }
+            return result
+        }
+        function copy(code) {
+            let oInput = document.createElement('input')
+            oInput.value = code
+            document.body.appendChild(oInput)
+            oInput.select()
+            document.execCommand('Copy')
+            layer.msg("复制成功 ! ", { icon: 1 })
+            oInput.remove()
+        }
+    </script>
+</body>
+</html>
