@@ -101,7 +101,7 @@
                 .then((res) => {
                     this.cfg = res.data
                 })
-                axios.get("http://175.178.57.88:8080/App/XOnline/ConnectCode/list")
+                axios.get("dnmd")
                 .then((res) => {
                     this.items = res.data
                 })
@@ -155,7 +155,7 @@
             watch: {
                 Icontent(value) {
                     if(!value) {
-                        axios.get("http://175.178.57.88:8080/App/XOnline/ConnectCode/list")
+                        axios.get("dnmd")
                         .then((res) => {
                             this.items = res.data
                         })
@@ -216,7 +216,7 @@
                             if(!this.cfg){
                                 axios({
                                     method: 'post',
-                                    url: "http://175.178.57.88:8080/App/XOnline/ConnectCode/add",
+                                    url: "dnmd",
                                     params: {name:this.name,des:this.des,code:random_string(16)+'&'+random_string(16),port:this.port.replace(/\s+/g,'')}
                                 }).then(res => {
                                     if(res.data.success){
@@ -412,7 +412,7 @@
                         if(this.json.name || this.json.des) {
                             axios({
                                     method: 'post',
-                                    url: "http://175.178.57.88:8080/App/XOnline/ConnectCode/remove",
+                                    url: "dnmd",
                                     params: this.json
                                 }).then((res) => {
                                     console.log(res.data)
@@ -460,7 +460,7 @@
                     this.title = res.data.title.titleText
                     this.$refs.titleTextColor.style.color = res.data.title.titleTextColor
                 })
-                axios.get("http://175.178.57.88:8080/App/XOnline/Version/latest")
+                axios.get("dnmd")
                 .then((res) => {
                     this.updateTitle = res.data.version + '更新内容:'
                     this.updateContext = res.data.content
