@@ -1,0 +1,8 @@
+com\xonline\pojo\redis\CreatedConnect.class
+com\xonline\controller\ApiController.class
+com\xonline\mapper\UpdateContentMapper.class
+com\xonline\pojo\sql\UpdateContent.class
+com\xonline\mapper\ConnectRecordMapper.class
+com\xonline\XonlineApiApplication.class
+com\xonline\config\RedisConfig.class
+com\xonline\pojo\sql\ConnectRecord.class

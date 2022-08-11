@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xonline.mapper.ConnectRecordMapper">
+    <select id="queryConnectRecordList" resultType="ConnectRecord">
+        select * from connectrecord
+    </select>
+    <select id="queryConnectRecordById" resultType="ConnectRecord">
+        select * from connectrecord where id = #{id}
+    </select>
+    <insert id="addConnectRecord" parameterType="ConnectRecord">
+        insert into connectrecord (id,name,des,code,time) values (#{id},#{name},#{des},#{code},#{time})
+    </insert>
+    <delete id="removeConnectRecord" parameterType="int">
+        delete from connectrecord where id = #{id}
+    </delete>
+</mapper>
